@@ -1,0 +1,58 @@
+# Xcode
+.build/
+binaries/
+DerivedData/
+*.xcuserstate
+*.xcuserdatad/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+xcuserdata/
+
+# Swift Package Manager
+.swiftpm/
+Packages/
+Package.resolved
+
+# Build artifacts
+build/
+*.app
+*.dSYM.zip
+*.dSYM
+
+# Distribution
+*.dmg
+*.zip
+*.pkg
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+
+# Environment
+.env
+.env.*
+*.local
+
+# Logs
+*.log
+
+# Sensitive files
+*.p12
+*.mobileprovision
+*.cer
+
+# Temporary files
+*.tmp
+*.temp
