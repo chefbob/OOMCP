@@ -1,0 +1,99 @@
+/*
+  Localizable.strings
+  OmniOutlinerMCP
+
+  User-facing strings for the OmniOutliner MCP Server
+*/
+
+// MARK: - App General
+"app.name" = "OmniOutliner MCP";
+"app.version" = "1.0.0";
+
+// MARK: - Menu Bar
+"menu.status.connected" = "Connected";
+"menu.status.waiting" = "Waiting for OmniOutliner";
+"menu.status.stopped" = "Server Stopped";
+"menu.server.start" = "Start Server";
+"menu.server.stop" = "Stop Server";
+"menu.server.url" = "Server URL: %@";
+"menu.setup.chatgpt" = "Setup ChatGPT...";
+"menu.setup.claude" = "Setup Claude...";
+"menu.preferences" = "Preferences...";
+"menu.quit" = "Quit OmniOutliner MCP";
+
+// MARK: - Status Messages
+"status.server.starting" = "Starting server...";
+"status.server.running" = "Server running on port %d";
+"status.server.stopped" = "Server stopped";
+"status.omnioutliner.connected" = "Connected to OmniOutliner";
+"status.omnioutliner.document" = "Document: %@";
+"status.omnioutliner.no_document" = "No document open";
+"status.omnioutliner.not_running" = "OmniOutliner is not running";
+
+// MARK: - Error Messages
+"error.app_not_running.title" = "OmniOutliner Not Running";
+"error.app_not_running.message" = "Please open OmniOutliner to use this feature.";
+"error.app_not_running.suggestion" = "Launch OmniOutliner from your Applications folder.";
+
+"error.no_document.title" = "No Document Open";
+"error.no_document.message" = "Please open a document in OmniOutliner.";
+"error.no_document.suggestion" = "Open or create a new document in OmniOutliner.";
+
+"error.row_not_found.title" = "Row Not Found";
+"error.row_not_found.message" = "The specified row could not be found in the document.";
+"error.row_not_found.suggestion" = "The row may have been deleted or moved. Try refreshing the outline.";
+
+"error.invalid_location.title" = "Invalid Location";
+"error.invalid_location.message" = "Cannot place the row at the specified location.";
+"error.invalid_location.suggestion" = "Choose a different parent row or position.";
+
+"error.permission_denied.title" = "Permission Required";
+"error.permission_denied.message" = "OmniOutliner MCP needs permission to control OmniOutliner.";
+"error.permission_denied.suggestion" = "Go to System Settings > Privacy & Security > Automation and enable OmniOutliner for this app.";
+
+"error.document_locked.title" = "Document Locked";
+"error.document_locked.message" = "The document is read-only or locked.";
+"error.document_locked.suggestion" = "Unlock the document in OmniOutliner or open a different document.";
+
+"error.operation_failed.title" = "Operation Failed";
+"error.operation_failed.message" = "The operation could not be completed.";
+"error.operation_failed.suggestion" = "Please try again. If the problem persists, restart OmniOutliner.";
+
+"error.server_start_failed.title" = "Server Start Failed";
+"error.server_start_failed.message" = "Could not start the MCP server on port %d.";
+"error.server_start_failed.suggestion" = "Another application may be using this port. Try changing the port in Preferences.";
+
+// MARK: - Modification Messages
+"modify.added" = "Added '%@'";
+"modify.updated" = "Updated '%@'";
+"modify.moved" = "Moved '%@'";
+"modify.deleted" = "Deleted '%@' and %d child rows";
+"modify.undo_hint" = "Use Cmd+Z in OmniOutliner to undo this change.";
+
+// MARK: - Confirmation
+"confirm.delete.title" = "Confirm Deletion";
+"confirm.delete.message" = "This will delete '%@' and %d child rows.";
+"confirm.delete.confirm" = "Delete";
+"confirm.delete.cancel" = "Cancel";
+
+// MARK: - Preferences
+"preferences.title" = "Preferences";
+"preferences.port" = "Server Port";
+"preferences.port.description" = "The port number for the MCP server (default: 3000)";
+"preferences.autolaunch" = "Start at Login";
+"preferences.autolaunch.description" = "Automatically launch when you log in";
+
+// MARK: - Setup Instructions
+"setup.chatgpt.title" = "Setup ChatGPT Desktop";
+"setup.chatgpt.step1" = "1. Open ChatGPT Desktop";
+"setup.chatgpt.step2" = "2. Go to Settings → Connectors → Advanced";
+"setup.chatgpt.step3" = "3. Enable Developer Mode";
+"setup.chatgpt.step4" = "4. Go to Settings → Connectors → Create";
+"setup.chatgpt.step5" = "5. Enter Name: OmniOutliner";
+"setup.chatgpt.step6" = "6. Enter Server URL: %@";
+"setup.chatgpt.step7" = "7. Click Save";
+
+"setup.claude.title" = "Setup Claude Desktop";
+"setup.claude.step1" = "1. Open Claude Desktop configuration";
+"setup.claude.step2" = "2. Add the following to your config:";
+"setup.claude.step3" = "3. Restart Claude Desktop";
