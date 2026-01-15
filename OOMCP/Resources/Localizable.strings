@@ -16,7 +16,6 @@
 "menu.server.start" = "Start Server";
 "menu.server.stop" = "Stop Server";
 "menu.server.url" = "Server URL: %@";
-"menu.setup.chatgpt" = "Setup ChatGPT...";
 "menu.setup.claude" = "Setup Claude...";
 "menu.preferences" = "Preferences...";
 "menu.quit" = "Quit OmniOutliner MCP";
@@ -84,15 +83,6 @@
 "preferences.autolaunch.description" = "Automatically launch when you log in";
 
 // MARK: - Setup Instructions
-"setup.chatgpt.title" = "Setup ChatGPT Desktop";
-"setup.chatgpt.step1" = "1. Open ChatGPT Desktop";
-"setup.chatgpt.step2" = "2. Go to Settings → Connectors → Advanced";
-"setup.chatgpt.step3" = "3. Enable Developer Mode";
-"setup.chatgpt.step4" = "4. Go to Settings → Connectors → Create";
-"setup.chatgpt.step5" = "5. Enter Name: OmniOutliner";
-"setup.chatgpt.step6" = "6. Enter Server URL: %@";
-"setup.chatgpt.step7" = "7. Click Save";
-
 "setup.claude.title" = "Setup Claude Desktop";
 "setup.claude.step1" = "1. Open Claude Desktop configuration";
 "setup.claude.step2" = "2. Add the following to your config:";

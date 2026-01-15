@@ -71,8 +71,9 @@ ln -s /Applications "$STAGING_DIR/Applications"
 rm -f "$DMG_PATH"
 
 # Create DMG using hdiutil (built into macOS)
+# Note: Volume name must differ from app name to avoid macOS permission issues
 hdiutil create \
-    -volname "$APP_NAME" \
+    -volname "Install $APP_NAME" \
     -srcfolder "$STAGING_DIR" \
     -ov \
     -format UDZO \

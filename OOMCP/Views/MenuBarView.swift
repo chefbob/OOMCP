@@ -100,21 +100,7 @@ struct MenuBarView: View {
                 .foregroundColor(.secondary)
 
             Button {
-                SetupWindowController.shared.showWindow(for: .chatGPT)
-            } label: {
-                HStack {
-                    Image(systemName: "bubble.left.and.bubble.right")
-                    Text("Setup ChatGPT")
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .buttonStyle(.plain)
-
-            Button {
-                SetupWindowController.shared.showWindow(for: .claude)
+                SetupWindowController.shared.showWindow()
             } label: {
                 HStack {
                     Image(systemName: "brain")

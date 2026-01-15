@@ -7,40 +7,25 @@ import AppKit
 class SetupWindowController {
     static let shared = SetupWindowController()
 
-    private var chatGPTWindow: NSWindow?
     private var claudeWindow: NSWindow?
 
     private init() {}
 
-    func showWindow(for client: AIClient) {
-        let window: NSWindow
-
-        switch client {
-        case .chatGPT:
-            if let existing = chatGPTWindow, existing.isVisible {
-                existing.makeKeyAndOrderFront(nil)
-                NSApp.activate(ignoringOtherApps: true)
-                return
-            }
-            window = createWindow(for: client)
-            chatGPTWindow = window
-
-        case .claude:
-            if let existing = claudeWindow, existing.isVisible {
-                existing.makeKeyAndOrderFront(nil)
-                NSApp.activate(ignoringOtherApps: true)
-                return
-            }
-            window = createWindow(for: client)
-            claudeWindow = window
+    func showWindow() {
+        if let existing = claudeWindow, existing.isVisible {
+            existing.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
         }
+        let window = createWindow()
+        claudeWindow = window
 
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
 
-    private func createWindow(for client: AIClient) -> NSWindow {
-        let contentView = SetupInstructionsView(client: client)
+    private func createWindow() -> NSWindow {
+        let contentView = SetupInstructionsView()
             .environmentObject(Preferences.shared)
 
         let window = NSWindow(
@@ -50,7 +35,7 @@ class SetupWindowController {
             defer: false
         )
 
-        window.title = "Setup \(client.displayName)"
+        window.title = "Setup Claude Desktop"
         window.contentView = NSHostingView(rootView: contentView)
         window.center()
         window.isReleasedWhenClosed = false
@@ -59,21 +44,44 @@ class SetupWindowController {
     }
 }
 
-/// Setup instructions for ChatGPT and Claude Desktop.
+/// Setup instructions for Claude Desktop.
 struct SetupInstructionsView: View {
-    let client: AIClient
     @EnvironmentObject var preferences: Preferences
+
+    private let steps: [SetupStep] = [
+        SetupStep(title: "Install mcp-remote",
+                 description: "This proxy bridges HTTP servers to Claude's stdio transport:",
+                 code: "npm install -g mcp-remote"),
+        SetupStep(title: "Open Configuration File",
+                 description: "Open ~/Library/Application Support/Claude/claude_desktop_config.json"),
+        SetupStep(title: "Add Server Configuration",
+                 description: "Add or update the mcpServers section:",
+                 code: """
+                 {
+                   "mcpServers": {
+                     "omnioutliner": {
+                       "command": "npx",
+                       "args": ["mcp-remote", "{URL}/mcp"]
+                     }
+                   }
+                 }
+                 """),
+        SetupStep(title: "Save and Restart",
+                 description: "Save the file and restart Claude Desktop"),
+        SetupStep(title: "Enable in Developer Settings",
+                 description: "Go to Settings → Developer and ensure the server is enabled")
+    ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             // Header
             HStack {
-                Image(systemName: client.iconName)
+                Image(systemName: "brain")
                     .font(.title)
                     .foregroundColor(.accentColor)
 
                 VStack(alignment: .leading) {
-                    Text("Setup \(client.displayName)")
+                    Text("Setup Claude Desktop")
                         .font(.title2.bold())
                     Text("Connect your AI assistant to OmniOutliner")
                         .font(.subheadline)
@@ -88,7 +96,7 @@ struct SetupInstructionsView: View {
             // Instructions
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    ForEach(Array(client.steps.enumerated()), id: \.offset) { index, step in
+                    ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
                         StepView(number: index + 1, step: step, serverURL: preferences.serverURL)
                     }
                 }
@@ -98,17 +106,15 @@ struct SetupInstructionsView: View {
 
             // Footer with copy button
             HStack {
-                if client == .claude {
-                    Button {
-                        copyConfigToClipboard()
-                    } label: {
-                        HStack {
-                            Image(systemName: "doc.on.clipboard")
-                            Text("Copy Configuration")
-                        }
+                Button {
+                    copyConfigToClipboard()
+                } label: {
+                    HStack {
+                        Image(systemName: "doc.on.clipboard")
+                        Text("Copy Configuration")
                     }
-                    .buttonStyle(.bordered)
                 }
+                .buttonStyle(.bordered)
 
                 Spacer()
 
@@ -200,75 +206,6 @@ struct CodeBlock: View {
     }
 }
 
-// MARK: - AI Client Enum
-
-enum AIClient {
-    case chatGPT
-    case claude
-
-    var displayName: String {
-        switch self {
-        case .chatGPT: return "ChatGPT Desktop"
-        case .claude: return "Claude Desktop"
-        }
-    }
-
-    var iconName: String {
-        switch self {
-        case .chatGPT: return "bubble.left.and.bubble.right"
-        case .claude: return "brain"
-        }
-    }
-
-    var steps: [SetupStep] {
-        switch self {
-        case .chatGPT:
-            return [
-                SetupStep(title: "Important: Tunnel Required",
-                         description: "ChatGPT cannot connect to localhost directly. You need to expose your server via a tunnel (ngrok, Cloudflare Tunnel, etc.)"),
-                SetupStep(title: "Start a Tunnel",
-                         description: "Run ngrok or similar to create a public HTTPS URL:",
-                         code: "ngrok http {URL}"),
-                SetupStep(title: "Open ChatGPT Desktop"),
-                SetupStep(title: "Open Settings",
-                         description: "Go to Settings → Connectors → Advanced"),
-                SetupStep(title: "Enable Developer Mode",
-                         description: "Toggle on 'Developer Mode'"),
-                SetupStep(title: "Create a Connector",
-                         description: "Go to Settings → Connectors → Create"),
-                SetupStep(title: "Configure the Connector",
-                         description: "Enter Name: OmniOutliner, then enter your ngrok HTTPS URL as the Server URL"),
-                SetupStep(title: "Save",
-                         description: "Click Save to complete setup")
-            ]
-        case .claude:
-            return [
-                SetupStep(title: "Install mcp-remote",
-                         description: "This proxy bridges HTTP servers to Claude's stdio transport:",
-                         code: "npm install -g mcp-remote"),
-                SetupStep(title: "Open Configuration File",
-                         description: "Open ~/Library/Application Support/Claude/claude_desktop_config.json"),
-                SetupStep(title: "Add Server Configuration",
-                         description: "Add or update the mcpServers section:",
-                         code: """
-                         {
-                           "mcpServers": {
-                             "omnioutliner": {
-                               "command": "npx",
-                               "args": ["mcp-remote", "{URL}/mcp"]
-                             }
-                           }
-                         }
-                         """),
-                SetupStep(title: "Save and Restart",
-                         description: "Save the file and restart Claude Desktop"),
-                SetupStep(title: "Enable in Developer Settings",
-                         description: "Go to Settings → Developer and ensure the server is enabled")
-            ]
-        }
-    }
-}
-
 // MARK: - Setup Step
 
 struct SetupStep {
@@ -279,12 +216,7 @@ struct SetupStep {
 
 // MARK: - Preview
 
-#Preview("ChatGPT Setup") {
-    SetupInstructionsView(client: .chatGPT)
-        .environmentObject(Preferences.shared)
-}
-
 #Preview("Claude Setup") {
-    SetupInstructionsView(client: .claude)
+    SetupInstructionsView()
         .environmentObject(Preferences.shared)
 }
