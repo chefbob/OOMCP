@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Create a DMG installer for OmniOutliner MCP
+# Create a DMG installer for OOMCP
 # Uses only built-in macOS tools (no Homebrew required)
 #
 # Prerequisites:
@@ -8,27 +8,28 @@
 # 2. Export the notarized app (Distribute App → Developer ID → Export)
 # 3. Run this script with the path to the exported .app
 #
-# Usage: ./scripts/create-dmg.sh /path/to/OmniOutlinerMCP.app
+# Usage: ./scripts/create-dmg.sh /path/to/OOMCP.app
 #
 
 set -e
 
 # Check arguments
 if [ -z "$1" ]; then
-    echo "Usage: $0 /path/to/OmniOutlinerMCP.app"
+    echo "Usage: $0 /path/to/OOMCP.app"
     echo ""
     echo "The app should be the notarized export from Xcode."
     exit 1
 fi
 
 APP_PATH="$1"
-APP_NAME="OmniOutliner MCP"
-DMG_NAME="OmniOutlinerMCP"
+APP_NAME="OOMCP"
+DMG_NAME="OOMCP"
 VERSION=$(defaults read "$APP_PATH/Contents/Info.plist" CFBundleShortVersionString 2>/dev/null || echo "1.0.0")
 
-# Verify the app exists
-if [ ! -d "$APP_PATH" ]; then
-    echo "Error: App not found at $APP_PATH"
+# Verify the app exists and is actually an app bundle
+if [ ! -d "$APP_PATH" ] || [[ "$APP_PATH" != *.app ]]; then
+    echo "Error: '$APP_PATH' is not a valid .app bundle"
+    echo "Please provide the path to OOMCP.app, not a directory containing it"
     exit 1
 fi
 

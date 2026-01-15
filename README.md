@@ -1,10 +1,10 @@
-# OmniOutliner MCP
+# OOMCP
 
 A Model Context Protocol (MCP) server that enables AI assistants to read and modify OmniOutliner documents.
 
 ## Overview
 
-OmniOutliner MCP runs as a macOS menu bar application, providing a localhost HTTP server that exposes OmniOutliner's scripting capabilities through the MCP protocol. This allows AI tools like Claude to interact with your outlines - reading content, searching, adding items, and reorganizing structure.
+OmniOutliner MCP runs as a macOS menu bar application, providing a localhost HTTP server that exposes OmniOutliner's scripting capabilities through the MCP protocol. This allows AI tools like Claude to interact with your outlines - reading content, searching, adding items, and reorganizing structure.  The project was built by Claude Code.  I'm not an Mac developer so feedback is welcome.
 
 ## Requirements
 
@@ -14,27 +14,29 @@ OmniOutliner MCP runs as a macOS menu bar application, providing a localhost HTT
 
 ## Installation
 
+### From Image
+Download the OOMCP.dmg file and drag it to the application folder.
 ### From Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/OmniOutlinerMCP.git
-cd OmniOutlinerMCP
+git clone https://github.com/chefbob/OOMCP.git
+cd OOMCP
 
 # Build
 swift build -c release
 
 # Run
-.build/release/OmniOutlinerMCP
+.build/release/OOMCP
 ```
 
 ### Xcode
 
-Open the project in Xcode and build/run the `OmniOutlinerMCP` scheme.
+Open the project in Xcode and build/run the `OOMCP` scheme.
 
 ## Usage
 
-1. Launch OmniOutliner MCP from Applications or build output
+1. Launch OOMCP from Applications or build output
 2. The app appears in your menu bar with a status indicator:
    - **Green**: Connected to OmniOutliner with a document open
    - **Yellow**: OmniOutliner running but no document open, or app not running
@@ -106,7 +108,7 @@ Access preferences from the menu bar icon:
 ## Architecture
 
 ```
-OmniOutlinerMCP/
+OOMCP/
 ├── App/           # Entry point, AppState, Preferences
 ├── Views/         # SwiftUI menu bar and settings
 ├── Server/        # Vapor HTTP server, MCP protocol, JSON-RPC

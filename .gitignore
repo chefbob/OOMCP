@@ -1,6 +1,6 @@
 # Xcode
 .build/
-binaries/
+OOMCP.app
 DerivedData/
 *.xcuserstate
 *.xcuserdatad/
