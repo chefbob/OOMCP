@@ -183,7 +183,7 @@ struct PreferencesView: View {
             Text("OmniOutliner MCP")
                 .font(.title.bold())
 
-            Text("Version 0.4.0")
+            Text("Version \(Bundle.main.appVersion)")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
 
@@ -195,9 +195,9 @@ struct PreferencesView: View {
             Spacer()
 
             HStack(spacing: 16) {
-                Link("Documentation", destination: URL(string: "https://github.com/example/omnioutliner-mcp")!)
+                Link("Documentation", destination: URL(string: "https://github.com/chefbob/OOMCP")!)
 
-                Link("Report Issue", destination: URL(string: "https://github.com/example/omnioutliner-mcp/issues")!)
+                Link("Report Issue", destination: URL(string: "https://github.com/chefbob/OOMCP/issues")!)
             }
             .font(.caption)
         }
@@ -226,7 +226,7 @@ struct PreferencesView: View {
 extension PreferencesView {
     var restartAlert: Alert {
         Alert(
-            title: Text("Restart Required"),
+            title: Text("Manual Restart Required"),
             message: Text("The port change will take effect after restarting the app."),
             primaryButton: .default(Text("Quit Now")) {
                 NSApp.terminate(nil)
@@ -242,4 +242,23 @@ extension PreferencesView {
     PreferencesView()
         .environmentObject(Preferences.shared)
         .environmentObject(AppState())
+}
+
+// MARK: - Bundle Extension
+
+extension Bundle {
+    /// App version from Info.plist (CFBundleShortVersionString / MARKETING_VERSION)
+    var appVersion: String {
+        infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+    }
+
+    /// Build number from Info.plist (CFBundleVersion / CURRENT_PROJECT_VERSION)
+    var buildNumber: String {
+        infoDictionary?["CFBundleVersion"] as? String ?? "1"
+    }
+
+    /// Combined version and build string (e.g., "1.0.0 (42)")
+    var fullVersion: String {
+        "\(appVersion) (\(buildNumber))"
+    }
 }
