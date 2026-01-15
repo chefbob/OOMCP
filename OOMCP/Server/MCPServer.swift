@@ -172,14 +172,33 @@ final class MCPServer: ObservableObject {
             )
         }
 
-        // CORS preflight handling
+        // CORS preflight handling - restricted to localhost origins only for security
         app.on(.OPTIONS, "mcp") { req -> Response in
             var headers = HTTPHeaders()
-            headers.add(name: .accessControlAllowOrigin, value: "*")
-            headers.add(name: .accessControlAllowMethods, value: "POST, OPTIONS")
-            headers.add(name: .accessControlAllowHeaders, value: "Content-Type")
+
+            // Only allow CORS from localhost origins to prevent cross-origin attacks
+            if let origin = req.headers.first(name: .origin),
+               Self.isLocalhostOrigin(origin) {
+                headers.add(name: .accessControlAllowOrigin, value: origin)
+                headers.add(name: .accessControlAllowMethods, value: "POST, OPTIONS")
+                headers.add(name: .accessControlAllowHeaders, value: "Content-Type")
+            }
+
             return Response(status: .ok, headers: headers)
         }
+    }
+
+    // MARK: - CORS Helpers
+
+    /// Check if an origin is a localhost origin (security measure).
+    private nonisolated static func isLocalhostOrigin(_ origin: String) -> Bool {
+        guard let url = URL(string: origin),
+              let host = url.host?.lowercased() else {
+            return false
+        }
+
+        // Allow localhost, 127.0.0.1, and IPv6 localhost
+        return host == "localhost" || host == "127.0.0.1" || host == "::1"
     }
 
     // MARK: - Server URL

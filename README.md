@@ -102,8 +102,23 @@ Access preferences from the menu bar icon:
 
 - Server binds to localhost only (127.0.0.1)
 - No remote connections accepted
+- CORS restricted to localhost origins only
 - All changes are undoable in OmniOutliner (Cmd+Z)
 - Destructive operations require explicit confirmation
+
+### App Sandbox
+
+This application runs with the macOS App Sandbox **disabled**. This is required because:
+
+1. **AppleScript/JXA Execution**: The app uses `NSAppleScript` and `osascript` to communicate with OmniOutliner via JavaScript for Automation (JXA). Sandboxed apps cannot execute arbitrary scripts or control other applications without specific entitlements that Apple does not grant for general AppleScript usage.
+
+2. **Inter-Application Communication**: Controlling OmniOutliner requires sending Apple Events, which are restricted in sandboxed environments.
+
+**Mitigations in place:**
+- The HTTP server only binds to localhost (127.0.0.1), preventing remote access
+- All user inputs are validated and sanitized before being passed to scripts
+- String inputs are properly escaped to prevent script injection attacks
+- The app requests only the minimum Automation permissions needed
 
 ## Architecture
 
