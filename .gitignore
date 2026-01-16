@@ -56,3 +56,4 @@ build/
 # Temporary files
 *.tmp
 *.temp
+*.profraw

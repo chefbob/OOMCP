@@ -19,13 +19,13 @@ struct GetSectionContentHandler: MCPToolHandler {
     var tool: MCPTool {
         var builder = ToolBuilder(
             name: "get_section_content",
-            description: "Get the complete text content of a section and all its descendants, formatted for summarization or content generation."
+            description: "Get the text content of a section with pagination. Use get_outline_structure with maxDepth=1 first to see section overview with descendantCount, then use rowId to fetch specific sections. Response includes pagination metadata showing hasMore and totalRowsInSection."
         )
 
         builder.addParameter(
             "rowId",
             type: "string",
-            description: "Root row ID for the section. Omit for entire document."
+            description: "Root row ID for the section. Omit for entire document. Use get_outline_structure to find section IDs."
         )
 
         builder.addParameter(
@@ -42,6 +42,23 @@ struct GetSectionContentHandler: MCPToolHandler {
             defaultValue: "structured"
         )
 
+        builder.addParameter(
+            "offset",
+            type: "integer",
+            description: "Number of rows to skip (for pagination). Default 0.",
+            defaultValue: 0,
+            minimum: 0
+        )
+
+        builder.addParameter(
+            "limit",
+            type: "integer",
+            description: "Maximum number of rows to return per page. Default 500.",
+            defaultValue: 500,
+            minimum: 1,
+            maximum: 2000
+        )
+
         return builder.build()
     }
 
@@ -49,8 +66,10 @@ struct GetSectionContentHandler: MCPToolHandler {
         let rowId = arguments?["rowId"]?.stringValue
         let documentName = arguments?["documentName"]?.stringValue
         let format = arguments?["format"]?.stringValue ?? "structured"
+        let offset = arguments?["offset"]?.intValue ?? 0
+        let limit = arguments?["limit"]?.intValue ?? 500
 
-        let script = JXAScripts.getSectionContent(rowId: rowId, format: format, documentName: documentName)
+        let script = JXAScripts.getSectionContent(rowId: rowId, format: format, documentName: documentName, offset: offset, limit: limit)
         let result = try await OmniOutlinerBridge.shared.execute(script)
 
         return MCPToolResult.json(result)

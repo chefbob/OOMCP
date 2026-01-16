@@ -209,6 +209,7 @@ enum JXAScripts {
 
     /// Get the full outline structure of the current document.
     /// Parameters: maxDepth (optional), includeNotes (default: true)
+    /// For large documents (500+ rows), automatically limits to top-level for performance.
     static func getOutlineStructure(maxDepth: Int? = nil, includeNotes: Bool = true, documentName: String? = nil) -> String {
         let maxDepthParam = maxDepth.map { String($0) } ?? "null"
         let documentNameParam = documentName.map { "'\($0.replacingOccurrences(of: "'", with: "\\'"))'" } ?? "null"
@@ -224,22 +225,83 @@ enum JXAScripts {
             try {
                 const documentName = \(documentNameParam);
                 const { doc, index } = findDocument(app, documentName);
-                const allRows = doc.rows();
-                const maxDepth = \(maxDepthParam);
+                const totalRowCount = doc.rows().length;
+                const requestedMaxDepth = \(maxDepthParam);
                 const includeNotes = \(includeNotes);
 
+                // Smart auto-limiting for large documents
+                const LARGE_DOC_THRESHOLD = 500;
+                const useFastMode = requestedMaxDepth === null && totalRowCount >= LARGE_DOC_THRESHOLD;
+
+                if (useFastMode) {
+                    // FAST MODE: Use whose() filter for large documents
+                    // This filters on OmniOutliner's side, avoiding 7000+ IPC calls
+                    const topRows = doc.rows.whose({level: 1})();
+                    const result = [];
+
+                    for (let i = 0; i < topRows.length; i++) {
+                        const row = topRows[i];
+                        const rowData = {
+                            id: row.id(),
+                            topic: row.topic(),
+                            level: 1,
+                            state: row.state() || 'none'
+                        };
+
+                        if (includeNotes) {
+                            rowData.note = row.note() || null;
+                        }
+
+                        result.push(rowData);
+                    }
+
+                    return JSON.stringify({
+                        document: {
+                            name: doc.name(),
+                            totalRowCount: totalRowCount,
+                            rowsReturned: result.length,
+                            isFrontmost: index === 0,
+                            autoLimited: true,
+                            effectiveMaxDepth: 1,
+                            message: 'Large document (' + totalRowCount + ' rows). Showing top-level only for performance. Use get_section_content(rowId) to explore sections, which returns totalRowsInSection.'
+                        },
+                        rows: result
+                    });
+                }
+
+                // FULL MODE: Iterate all rows with descendantCount (for small docs or explicit maxDepth)
+                const allRows = doc.rows();
                 const result = [];
-                for (let i = 0; i < allRows.length; i++) {
+                const stack = []; // indices into result, representing open ancestors
+
+                for (let i = 0; i < totalRowCount; i++) {
                     const row = allRows[i];
                     const level = row.level();
 
-                    if (maxDepth !== null && level > maxDepth) continue;
+                    // Pop items from stack that are no longer ancestors (same or lower level)
+                    while (stack.length > 0 && result[stack[stack.length - 1]].level >= level) {
+                        stack.pop();
+                    }
+
+                    if (requestedMaxDepth !== null && level > requestedMaxDepth) {
+                        // This row is not included, but is a descendant of everything on the stack
+                        for (let s = 0; s < stack.length; s++) {
+                            result[stack[s]].descendantCount++;
+                        }
+                        continue;
+                    }
+
+                    // This row is included and is a descendant of everything on the stack
+                    for (let s = 0; s < stack.length; s++) {
+                        result[stack[s]].descendantCount++;
+                    }
 
                     const rowData = {
                         id: row.id(),
                         topic: row.topic(),
                         level: level,
-                        state: row.state() || 'none'
+                        state: row.state() || 'none',
+                        descendantCount: 0
                     };
 
                     if (includeNotes) {
@@ -247,12 +309,14 @@ enum JXAScripts {
                     }
 
                     result.push(rowData);
+                    stack.push(result.length - 1);
                 }
 
                 return JSON.stringify({
                     document: {
                         name: doc.name(),
-                        rowCount: result.length,
+                        totalRowCount: totalRowCount,
+                        rowsReturned: result.length,
                         isFrontmost: index === 0
                     },
                     rows: result
@@ -980,8 +1044,8 @@ enum JXAScripts {
 
     // MARK: - Synthesis Scripts
 
-    /// Get section content in various formats.
-    static func getSectionContent(rowId: String? = nil, format: String = "structured", documentName: String? = nil) -> String {
+    /// Get section content in various formats with pagination support.
+    static func getSectionContent(rowId: String? = nil, format: String = "structured", documentName: String? = nil, offset: Int = 0, limit: Int = 500) -> String {
         let rowParam = rowId.map { "'\($0.replacingOccurrences(of: "'", with: "\\'"))'" } ?? "null"
         let documentNameParam = documentName.map { "'\($0.replacingOccurrences(of: "'", with: "\\'"))'" } ?? "null"
 
@@ -999,7 +1063,10 @@ enum JXAScripts {
                 const { doc } = findDocument(app, documentName);
                 const rowId = \(rowParam);
                 const format = '\(format)';
+                const offset = \(offset);
+                const limit = \(limit);
                 const allRows = doc.rows();
+                const totalRowCount = allRows.length;
 
                 let sectionTitle = doc.name();
                 let sectionId = null;
@@ -1025,47 +1092,89 @@ enum JXAScripts {
                     startIndex++; // Start from children
                 }
 
-                // Collect rows in the section
+                // Pagination-optimized row collection
+                // - Rows before offset: only check level (1 IPC) for section boundary
+                // - Rows in window: full property access (5 IPC)
+                // - Rows after window: only check level (1 IPC) for counting
                 const rows = [];
+                let rowsInSection = 0;
+                let prevLevel = baseLevel;
+
                 for (let i = startIndex; i < allRows.length; i++) {
                     const row = allRows[i];
                     const level = row.level();
 
-                    // Stop if we've exited the section
+                    // Stop if we've exited the section (for rowId mode)
                     if (rowId && level <= baseLevel) break;
-                    // For root level, collect all rows
-                    if (!rowId || level > baseLevel) {
-                        const childRows = row.rows();
-                        const childIds = [];
-                        for (let j = 0; j < childRows.length; j++) {
-                            childIds.push(childRows[j].id());
-                        }
 
-                        rows.push({
-                            id: row.id(),
-                            topic: row.topic(),
-                            note: row.note() || null,
-                            level: rowId ? level - baseLevel : level,
-                            state: row.state() || 'none',
-                            hasChildren: childRows.length > 0,
-                            childIds: childIds
-                        });
+                    // Count this row in the section
+                    rowsInSection++;
+
+                    // Skip rows before offset (minimal IPC - already got level)
+                    if (rowsInSection <= offset) {
+                        continue;
                     }
+
+                    // Stop collecting after limit, but continue counting
+                    if (rows.length >= limit) {
+                        continue;
+                    }
+
+                    // Collect this row (full property access)
+                    const adjustedLevel = rowId ? level - baseLevel : level;
+
+                    // Mark previous row as having children if current is deeper
+                    if (rows.length > 0 && adjustedLevel > prevLevel) {
+                        for (let k = rows.length - 1; k >= 0; k--) {
+                            if (rows[k].level === adjustedLevel - 1) {
+                                rows[k].hasChildren = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    rows.push({
+                        id: row.id(),
+                        topic: row.topic(),
+                        note: row.note() || null,
+                        level: adjustedLevel,
+                        state: row.state() || 'none',
+                        hasChildren: false
+                    });
+
+                    prevLevel = adjustedLevel;
                 }
 
-                const section = { title: sectionTitle, id: sectionId, documentName: doc.name() };
+                const pagination = {
+                    offset: offset,
+                    limit: limit,
+                    rowsReturned: rows.length,
+                    totalRowsInSection: rowsInSection,
+                    hasMore: (offset + rows.length) < rowsInSection
+                };
+
+                const section = {
+                    title: sectionTitle,
+                    id: sectionId,
+                    documentName: doc.name(),
+                    totalRowsInDocument: totalRowCount
+                };
 
                 if (format === 'markdown') {
                     let md = '# ' + sectionTitle + '\\n\\n';
                     for (const row of rows) {
-                        const indent = '  '.repeat(row.level - 1);
+                        const indent = '  '.repeat(Math.max(0, row.level - 1));
                         md += indent + '- ' + row.topic + '\\n';
                         if (row.note) {
                             md += indent + '  > ' + row.note + '\\n';
                         }
                     }
+                    if (pagination.hasMore) {
+                        md += '\\n... (page ' + Math.floor(offset / limit + 1) + ', showing rows ' + (offset + 1) + '-' + (offset + rows.length) + ' of ' + rowsInSection + ')\\n';
+                    }
                     return JSON.stringify({
                         section: section,
+                        pagination: pagination,
                         markdown: md
                     });
                 } else if (format === 'plain') {
@@ -1077,17 +1186,19 @@ enum JXAScripts {
                             text += indent + '  [Note: ' + row.note + ']\\n';
                         }
                     }
+                    if (pagination.hasMore) {
+                        text += '\\n... (page ' + Math.floor(offset / limit + 1) + ', showing rows ' + (offset + 1) + '-' + (offset + rows.length) + ' of ' + rowsInSection + ')\\n';
+                    }
                     return JSON.stringify({
                         section: section,
+                        pagination: pagination,
                         text: text
                     });
                 } else {
                     return JSON.stringify({
                         section: section,
-                        content: {
-                            rows: rows,
-                            totalRows: rows.length
-                        }
+                        pagination: pagination,
+                        rows: rows
                     });
                 }
             } catch (e) {
