@@ -1,7 +1,8 @@
 import XCTest
-@testable import OmniOutlinerMCP
+@testable import OOMCP
 
 /// Tests for Preferences view model that drives the preferences UI.
+@MainActor
 final class PreferencesTests: XCTestCase {
 
     // MARK: - Port Validation Tests

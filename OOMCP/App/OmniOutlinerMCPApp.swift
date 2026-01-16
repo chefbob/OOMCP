@@ -39,9 +39,20 @@ struct OmniOutlinerMCPApp: App {
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
 
+    /// Returns true if running inside XCTest (unit tests)
+    private var isRunningTests: Bool {
+        return ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+            || NSClassFromString("XCTestCase") != nil
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Set as accessory app (no dock icon by default)
         NSApp.setActivationPolicy(.accessory)
+
+        // Skip auto-start when running tests to avoid polling timer blocking test completion
+        guard !isRunningTests else {
+            return
+        }
 
         // Initialize tool registry with all tools
         Task { @MainActor in

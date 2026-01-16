@@ -1,5 +1,5 @@
 import XCTest
-@testable import OmniOutlinerMCP
+@testable import OOMCP
 
 /// Integration tests for synthesis tools that require a running OmniOutliner instance.
 /// These tests are skipped if OmniOutliner is not running.
@@ -188,7 +188,8 @@ final class SynthesisIntegrationTests: XCTestCase {
         let handler = InsertContentHandler()
         let uniqueId = UUID().uuidString.prefix(8)
 
-        // JSON structure for hierarchical content
+        // JSON structure for hierarchical content (per tool description:
+        // "JSON array of row objects with 'topic', 'note', and optional 'children' fields")
         let jsonContent = """
         {"topic": "JSON Parent \(uniqueId)", "children": [{"topic": "JSON Child \(uniqueId)"}]}
         """
@@ -199,13 +200,15 @@ final class SynthesisIntegrationTests: XCTestCase {
 
         let result = try await handler.execute(arguments: args)
 
-        // This may succeed or fail depending on implementation
-        // The test verifies the handler processes the request
-        if result.isError ?? false {
-            // JSON format might not be supported - that's OK
-            if case .text(let text) = result.content.first {
-                XCTAssertTrue(text.contains("error") || text.contains("invalid") || text.contains("format"))
-            }
+        // JSON structure should be supported per the tool description
+        XCTAssertFalse(result.isError ?? false, "JSON content insertion should succeed")
+
+        if case .text(let text) = result.content.first {
+            // Should indicate successful creation
+            XCTAssertTrue(
+                text.contains("created") || text.contains("inserted") || text.contains("\"id\""),
+                "Response should indicate successful insertion"
+            )
         }
 
         // Clean up

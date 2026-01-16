@@ -1,5 +1,5 @@
 import XCTest
-@testable import OmniOutlinerMCP
+@testable import OOMCP
 
 /// Integration tests for query tools that require a running OmniOutliner instance.
 /// These tests are skipped if OmniOutliner is not running.
@@ -39,7 +39,7 @@ final class QueryIntegrationTests: XCTestCase {
             XCTAssertTrue(text.contains("documents"))
             XCTAssertTrue(text.contains("totalOpen"))
             // Should have at least one document open (created in setUp if needed)
-            XCTAssertFalse(text.contains("\"totalOpen\":0") && text.contains("\"totalOpen\": 0"))
+            XCTAssertFalse(text.contains("\"totalOpen\":0") || text.contains("\"totalOpen\": 0"))
         }
     }
 

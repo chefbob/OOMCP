@@ -1,5 +1,5 @@
 import XCTest
-@testable import OmniOutlinerMCP
+@testable import OOMCP
 
 /// Performance tests for verifying response times with large outlines.
 /// Per SC-004: Response time under 2 seconds for outlines up to 5,000 rows.
@@ -9,9 +9,6 @@ import XCTest
 final class PerformanceTests: XCTestCase {
 
     // MARK: - Configuration
-
-    /// Minimum number of rows required for performance testing
-    private let minimumRowsForTest = 100
 
     /// Target response time in seconds (SC-004 requirement)
     private let targetResponseTime: TimeInterval = 2.0

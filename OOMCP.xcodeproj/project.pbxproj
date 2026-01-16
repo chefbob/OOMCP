@@ -18,19 +18,11 @@
 			remoteGlobalIDString = C4C970202F18167F0083CE4E;
 			remoteInfo = OOMCP;
 		};
-		C4C970392F1816800083CE4E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C4C970192F18167F0083CE4E /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = C4C970202F18167F0083CE4E;
-			remoteInfo = OOMCP;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		C4C970212F18167F0083CE4E /* OOMCP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OOMCP.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4C9702E2F1816800083CE4E /* OOMCPTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OOMCPTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C4C970382F1816800083CE4E /* OOMCPUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OOMCPUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -42,11 +34,6 @@
 		C4C970312F1816800083CE4E /* OOMCPTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = OOMCPTests;
-			sourceTree = "<group>";
-		};
-		C4C9703B2F1816800083CE4E /* OOMCPUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = OOMCPUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -67,13 +54,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C4C970352F1816800083CE4E /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -82,7 +62,6 @@
 			children = (
 				C4C970232F18167F0083CE4E /* OOMCP */,
 				C4C970312F1816800083CE4E /* OOMCPTests */,
-				C4C9703B2F1816800083CE4E /* OOMCPUITests */,
 				C4C970222F18167F0083CE4E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -92,7 +71,6 @@
 			children = (
 				C4C970212F18167F0083CE4E /* OOMCP.app */,
 				C4C9702E2F1816800083CE4E /* OOMCPTests.xctest */,
-				C4C970382F1816800083CE4E /* OOMCPUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -146,29 +124,6 @@
 			productReference = C4C9702E2F1816800083CE4E /* OOMCPTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		C4C970372F1816800083CE4E /* OOMCPUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = C4C970482F1816800083CE4E /* Build configuration list for PBXNativeTarget "OOMCPUITests" */;
-			buildPhases = (
-				C4C970342F1816800083CE4E /* Sources */,
-				C4C970352F1816800083CE4E /* Frameworks */,
-				C4C970362F1816800083CE4E /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				C4C9703A2F1816800083CE4E /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				C4C9703B2F1816800083CE4E /* OOMCPUITests */,
-			);
-			name = OOMCPUITests;
-			packageProductDependencies = (
-			);
-			productName = OOMCPUITests;
-			productReference = C4C970382F1816800083CE4E /* OOMCPUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -184,10 +139,6 @@
 						CreatedOnToolsVersion = 26.2;
 					};
 					C4C9702D2F1816800083CE4E = {
-						CreatedOnToolsVersion = 26.2;
-						TestTargetID = C4C970202F18167F0083CE4E;
-					};
-					C4C970372F1816800083CE4E = {
 						CreatedOnToolsVersion = 26.2;
 						TestTargetID = C4C970202F18167F0083CE4E;
 					};
@@ -212,7 +163,6 @@
 			targets = (
 				C4C970202F18167F0083CE4E /* OOMCP */,
 				C4C9702D2F1816800083CE4E /* OOMCPTests */,
-				C4C970372F1816800083CE4E /* OOMCPUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -226,13 +176,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C4C9702C2F1816800083CE4E /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C4C970362F1816800083CE4E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -256,13 +199,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C4C970342F1816800083CE4E /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -270,11 +206,6 @@
 			isa = PBXTargetDependency;
 			target = C4C970202F18167F0083CE4E /* OOMCP */;
 			targetProxy = C4C9702F2F1816800083CE4E /* PBXContainerItemProxy */;
-		};
-		C4C9703A2F1816800083CE4E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = C4C970202F18167F0083CE4E /* OOMCP */;
-			targetProxy = C4C970392F1816800083CE4E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -436,7 +367,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kilroysappfactory.OOMCP;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -486,7 +417,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kilroysappfactory.OOMCP;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -541,44 +472,6 @@
 			};
 			name = Release;
 		};
-		C4C970492F1816800083CE4E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = NV375WRR2V;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kilroysappfactory.oomcp.OOMCPUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = OOMCP;
-			};
-			name = Debug;
-		};
-		C4C9704A2F1816800083CE4E /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = NV375WRR2V;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kilroysappfactory.oomcp.OOMCPUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = OOMCP;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -605,15 +498,6 @@
 			buildConfigurations = (
 				C4C970462F1816800083CE4E /* Debug */,
 				C4C970472F1816800083CE4E /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		C4C970482F1816800083CE4E /* Build configuration list for PBXNativeTarget "OOMCPUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C4C970492F1816800083CE4E /* Debug */,
-				C4C9704A2F1816800083CE4E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

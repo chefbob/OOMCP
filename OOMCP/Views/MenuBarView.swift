@@ -160,6 +160,6 @@ struct MenuBarView: View {
 
 #Preview {
     MenuBarView()
-        .environmentObject(AppState())
+        .environmentObject(AppState.shared)
         .environmentObject(Preferences.shared)
 }

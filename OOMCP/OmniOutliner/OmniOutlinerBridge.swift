@@ -18,7 +18,7 @@ final class OmniOutlinerBridge: Sendable {
     /// - Returns: Parsed JSON result as a dictionary
     /// - Throws: OutlinerError if execution fails
     func execute(_ script: String) async throws -> [String: Any] {
-        let resultString = try executeJXA(script)
+        let resultString = try await executeJXA(script)
         return try parseJSONResult(resultString)
     }
 
@@ -28,7 +28,7 @@ final class OmniOutlinerBridge: Sendable {
     /// - Throws: OutlinerError if execution fails
     func executeRaw(_ script: String) async throws -> String {
         let wrappedScript = wrapAsJXA(script)
-        return try executeJXA(wrappedScript)
+        return try await executeJXA(wrappedScript)
     }
 
     /// Execute a complete JXA script directly (no wrapping).
@@ -36,7 +36,7 @@ final class OmniOutlinerBridge: Sendable {
     /// - Returns: Raw string result from the script
     /// - Throws: OutlinerError if execution fails
     func executeJXADirect(_ script: String) async throws -> String {
-        return try executeJXA(script)
+        return try await executeJXA(script)
     }
 
     // MARK: - Private Methods
@@ -98,64 +98,74 @@ final class OmniOutlinerBridge: Sendable {
     }
 
     /// Execute JXA script and parse JSON result.
-    private func executeAppleScript(_ source: String) throws -> [String: Any] {
-        let stringResult = try executeJXA(source)
+    private func executeAppleScript(_ source: String) async throws -> [String: Any] {
+        let stringResult = try await executeJXA(source)
         return try parseJSONResult(stringResult)
     }
 
     /// Execute JXA script using osascript command.
     /// Note: For sandboxed apps, ensure proper entitlements are configured.
-    private func executeJXA(_ source: String) throws -> String {
+    /// Runs on a background thread to avoid blocking the main thread.
+    private func executeJXA(_ source: String) async throws -> String {
         let startTime = CFAbsoluteTimeGetCurrent()
         DebugLogger.logScript("Executing osascript (\(source.count) chars)")
 
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        process.arguments = ["-l", "JavaScript", "-e", source]
+        // Move Process execution off MainActor to avoid blocking UI
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                let process = Process()
+                process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+                process.arguments = ["-l", "JavaScript", "-e", source]
 
-        let outputPipe = Pipe()
-        let errorPipe = Pipe()
-        process.standardOutput = outputPipe
-        process.standardError = errorPipe
+                let outputPipe = Pipe()
+                let errorPipe = Pipe()
+                process.standardOutput = outputPipe
+                process.standardError = errorPipe
 
-        do {
-            try process.run()
-            process.waitUntilExit()
-        } catch {
-            let duration = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
-            DebugLogger.logScript("osascript failed to launch after \(String(format: "%.1f", duration))ms: \(error)", type: .error)
-            throw OutlinerError.operationFailed(detail: "Failed to run osascript: \(error.localizedDescription)")
-        }
-
-        let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-        let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
-
-        let output = String(data: outputData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let errorOutput = String(data: errorData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-
-        let duration = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
-        DebugLogger.logScript("osascript completed in \(String(format: "%.1f", duration))ms (output: \(output.count) chars)")
-
-        if process.terminationStatus != 0 {
-            DebugLogger.logScript("osascript error (exit \(process.terminationStatus)): \(errorOutput)", type: .error)
-
-            // Check for specific error types
-            if errorOutput.contains("Pro feature") || errorOutput.contains("-1743") {
-                if errorOutput.contains("Pro feature") {
-                    throw OutlinerError.proRequired
-                } else {
-                    throw OutlinerError.permissionDenied
+                do {
+                    try process.run()
+                    process.waitUntilExit()
+                } catch {
+                    let duration = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
+                    DebugLogger.logScript("osascript failed to launch after \(String(format: "%.1f", duration))ms: \(error)", type: .error)
+                    continuation.resume(throwing: OutlinerError.operationFailed(detail: "Failed to run osascript: \(error.localizedDescription)"))
+                    return
                 }
-            }
 
-            if errorOutput.contains("not allowed") || errorOutput.contains("(-1743)") {
-                throw OutlinerError.permissionDenied
-            }
+                let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+                let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
 
-            throw OutlinerError.operationFailed(detail: "osascript error: \(errorOutput)")
+                let output = String(data: outputData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                let errorOutput = String(data: errorData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+                let duration = (CFAbsoluteTimeGetCurrent() - startTime) * 1000
+                DebugLogger.logScript("osascript completed in \(String(format: "%.1f", duration))ms (output: \(output.count) chars)")
+
+                if process.terminationStatus != 0 {
+                    DebugLogger.logScript("osascript error (exit \(process.terminationStatus)): \(errorOutput)", type: .error)
+
+                    // Check for specific error types
+                    if errorOutput.contains("Pro feature") || errorOutput.contains("-1743") {
+                        if errorOutput.contains("Pro feature") {
+                            continuation.resume(throwing: OutlinerError.proRequired)
+                        } else {
+                            continuation.resume(throwing: OutlinerError.permissionDenied)
+                        }
+                        return
+                    }
+
+                    if errorOutput.contains("not allowed") || errorOutput.contains("(-1743)") {
+                        continuation.resume(throwing: OutlinerError.permissionDenied)
+                        return
+                    }
+
+                    continuation.resume(throwing: OutlinerError.operationFailed(detail: "osascript error: \(errorOutput)"))
+                    return
+                }
+
+                continuation.resume(returning: output)
+            }
         }
-
-        return output
     }
 
     /// Parse JSON string result into dictionary.

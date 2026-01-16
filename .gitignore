@@ -20,6 +20,9 @@ build/
 *.dSYM.zip
 *.dSYM
 
+# Test Results
+TestResults/
+
 # Distribution
 *.dmg
 *.zip
@@ -56,3 +59,4 @@ build/
 # Temporary files
 *.tmp
 *.temp
+*.profraw
