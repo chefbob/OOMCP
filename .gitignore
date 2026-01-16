@@ -20,6 +20,9 @@ build/
 *.dSYM.zip
 *.dSYM
 
+# Test Results
+TestResults/
+
 # Distribution
 *.dmg
 *.zip

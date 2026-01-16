@@ -241,7 +241,7 @@ extension PreferencesView {
 #Preview {
     PreferencesView()
         .environmentObject(Preferences.shared)
-        .environmentObject(AppState())
+        .environmentObject(AppState.shared)
 }
 
 // MARK: - Bundle Extension

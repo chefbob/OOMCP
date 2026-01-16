@@ -117,7 +117,8 @@ enum JXAScripts {
     }
     """
 
-    /// Get content from all open documents.
+    /// Get the content of all open documents.
+    /// For large documents (500+ rows), automatically limits to top-level for performance.
     static func getAllDocumentsContent(includeNotes: Bool = true) -> String {
         return """
         function run() {
@@ -135,6 +136,7 @@ enum JXAScripts {
             }
 
             const includeNotes = \(includeNotes);
+            const LARGE_DOC_THRESHOLD = 500;
             const result = [];
 
             for (let d = 0; d < docs.length; d++) {
@@ -145,23 +147,46 @@ enum JXAScripts {
                     if (f) filePath = f.toString();
                 } catch(e) {}
 
-                const allRows = doc.rows();
+                const totalRowCount = doc.rows().length;
+                const useFastMode = totalRowCount >= LARGE_DOC_THRESHOLD;
                 const rows = [];
 
-                for (let i = 0; i < allRows.length; i++) {
-                    const row = allRows[i];
-                    const rowData = {
-                        id: row.id(),
-                        topic: row.topic(),
-                        level: row.level(),
-                        state: row.state() || 'none'
-                    };
+                if (useFastMode) {
+                    // FAST MODE: Use whose() filter for large documents
+                    const topRows = doc.rows.whose({level: 1})();
+                    for (let i = 0; i < topRows.length; i++) {
+                        const row = topRows[i];
+                        const rowData = {
+                            id: row.id(),
+                            topic: row.topic(),
+                            level: 1,
+                            state: row.state() || 'none'
+                        };
 
-                    if (includeNotes) {
-                        rowData.note = row.note() || null;
+                        if (includeNotes) {
+                            rowData.note = row.note() || null;
+                        }
+
+                        rows.push(rowData);
                     }
+                } else {
+                    // FULL MODE: Iterate all rows for small documents
+                    const allRows = doc.rows();
+                    for (let i = 0; i < allRows.length; i++) {
+                        const row = allRows[i];
+                        const rowData = {
+                            id: row.id(),
+                            topic: row.topic(),
+                            level: row.level(),
+                            state: row.state() || 'none'
+                        };
 
-                    rows.push(rowData);
+                        if (includeNotes) {
+                            rowData.note = row.note() || null;
+                        }
+
+                        rows.push(rowData);
+                    }
                 }
 
                 result.push({
@@ -170,6 +195,9 @@ enum JXAScripts {
                     filePath: filePath,
                     isFrontmost: d === 0,
                     modified: doc.modified(),
+                    totalRowCount: totalRowCount,
+                    rowsReturned: rows.length,
+                    autoLimited: useFastMode,
                     rows: rows
                 });
             }

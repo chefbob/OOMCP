@@ -1,5 +1,5 @@
 import XCTest
-@testable import OmniOutlinerMCP
+@testable import OOMCP
 
 /// Integration tests for modify tools that require a running OmniOutliner instance.
 /// These tests are skipped if OmniOutliner is not running.

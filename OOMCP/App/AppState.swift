@@ -107,7 +107,9 @@ final class AppState: ObservableObject {
 
     // MARK: - Initialization
 
-    init() {
+    /// Private initializer to enforce singleton pattern.
+    /// Use `AppState.shared` instead of creating new instances.
+    private init() {
         setupBindings()
     }
 

@@ -1,5 +1,5 @@
 import XCTest
-@testable import OmniOutlinerMCP
+@testable import OOMCP
 
 final class ConnectionStatusTests: XCTestCase {
 

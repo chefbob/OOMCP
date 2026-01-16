@@ -118,5 +118,5 @@ struct StatusBadge: View {
         }
     }
     .padding()
-    .environmentObject(AppState())
+    .environmentObject(AppState.shared)
 }
